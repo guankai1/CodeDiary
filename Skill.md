@@ -447,6 +447,7 @@ String.isEmpty(): return count == 0
   * 灵活, HTTP允许传输任意类型数据
   * 无连接
   * 无状态
+  * 明文传输
   * 支持B/S, C/S.
   * URL:http://www.baidu.com:80/news/info/list/index.jsp?ID=111&name=222
     * "http:" 协议部分
@@ -456,6 +457,9 @@ String.isEmpty(): return count == 0
     * "index.jsp" 文件名部分, 最后一个 "/" 到 "?"/"#", 如果都没有, 则到路径最后
     * "#xxx" 锚部分.
     * "?ID=111&name=222" 参数部分, 从 "?" 到 "#".
+  * ip是大马路, tcp是客车, http是乘客, 一个承载在另一个基础之上
+  * 寄快递例子:[Ref:知乎](https://www.zhihu.com/question/38648948)
+    * http客户端寄信两个物品给http服务端, tcp快递公司保证数据按序送达和丢失重传, ip负责查出地址和目的地的导航
 
 125. ContentProvider 和 sql 区别
 * ContentProvider 对数据共享不同app间访问
@@ -1255,17 +1259,124 @@ public static Bitmap getPicFromBytes(byte[] bytes, BitmapFactory.Options opts) {
 256. Unexpected token o in JSON at position 18[Ref:CSDN](https://blog.csdn.net/wxl1555/article/details/79184076)
 * 直接看第18个字符，可能是不可见的字符
 
-257. 代理
+### 257. 代理
 #### http代理
-##### 普通代理
-* 代理服务器作为中间人, 可以隐藏自己的存在, 但是通过X-Forwarded-IP这个自定义的Header, 可以告诉服务端真正的客户端IP
-* HTTPS是普通代理的克星，中间人拿不到证书和密钥，无法知道传输内容。只要两端严格验证证书，中间人就无法完成TLS握手（Charles抓HTTPS数据就需要安装证书，走回普通代理），不安装证书时的请求就是隧道代理
-##### 隧道代理
-* 。
+##### 普通代理(HTTP Proxy)[Ref:天天给 App 抓包，还不懂 HTTP 代理吗？](https://mp.weixin.qq.com/s/H5H0LixgRY6CoRunBaLBAw)
+* 代理服务器作为中间人, 可以隐藏自己的存在, 但是通过X-Forwarded-IP这个自定义的Header, 可以告诉服务端真正的客户端IP, Request-URI必须使用绝对路径
+* **HTTPS是普通代理的克星**，中间人拿不到证书和密钥，无法知道传输内容。只要两端严格验证证书，中间人就无法完成TLS握手（Charles抓HTTPS数据就需要安装证书，走回普通代理），不安装证书时的请求就是隧道代理
+##### 隧道代理(HTTP tunnel, HTTP/1.1中加入)[Ref:什么是HTTP隧道，怎么理解HTTP隧道呢](https://www.zhihu.com/question/21955083)
+* 常规请求，请求头结束的CRLF+CRLF后，之后的内容是请求体。
+* CONNET方法请求，不包含请求体，请求头的两个CRLF后的内容是转发的内容
+  * 请求：本地通过 CONNECT 方法, 创建一条 TCP 链接, 成功后服务器无脑盲转发 Head 后两个 CRLF 后的内容 **这些内容并非请求体**
+  * 返回：服务器在 TCP 链接成功时，返回```HTTP/1.1 200 Connection Established```), 这个 HEAD 结束后的内容均为远程服务器返回的内容，直到TCP通道关闭
+* 但是相比Socks5, RFC(请求注释文档)多，以及兼容历史等各种问题
 
-258. CRLF[Ref:CSDN](https://seacatcry.pixnet.net/blog/post/13732061-%E3%80%90%E8%BD%89%E8%B2%BC%E3%80%91%5Cr%5Cn%E5%92%8C%5Cn%E7%9A%84%E5%B7%AE%E7%95%B0)
+### 258. CRLF[Ref:CSDN](https://seacatcry.pixnet.net/blog/post/13732061-%E3%80%90%E8%BD%89%E8%B2%BC%E3%80%91%5Cr%5Cn%E5%92%8C%5Cn%E7%9A%84%E5%B7%AE%E7%95%B0)
 * \r, return (carriage return) 回车, 对应原始打印机把打印头定位在左边界
 * \n, newline(line feed) 换行, 对应原始打印机把纸下移一行
 * unix每行结尾只有\n，
 * windows每行结尾是\n\r
 * mac每行结尾只有\r
+
+### 259. HTTP请求
+一个完整的请求至少包含请求行，请求头，CRLF这三部分[Ref:RFC2016的第五章Request](https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html)
+##### 1. 请求行(Request-Line, 位于首行, 除了间隔和末尾，请求行不允许其他位置使用CRLF)
+  * 请求方法 空格 请求地址 空格 协议 \r\n
+  * 即 Method-URL-Protocol
+  * 其中, HTTP1.1中请求方法分为8种, **实际上服务器往往不会支持所有协议**
+    * 1.HEAD
+    * 2.TRACE
+    * 3.CONNECT 用于代理
+    * 4.OPTIONS
+####### 后四个是RESTful API
+    * 5.GET, 最常用
+    * 6.POST, 最常用
+    * 7.PUT
+    * 8.DELETE
+
+##### 2. 请求头(Generial-header, Request-header, entity-header)
+  * head1:value1\r\n
+  * head2:value2\r\n
+  * headn:valuen\r\n
+##### 3. 空行\r\n
+##### 4. 请求体(Entity Body)[Ref:理解HTTP之ContentType](https://segmentfault.com/a/1190000003002851)
+根据Content-Type的内容, 分为
+* 1.text/html 默认
+* 2.text/plain
+* 3.text/css
+* 4.text/javascript
+* 5.text/xml 微信的数据传递方式
+###### 后四个是post发包的形式[Ref:HTTP请求头与请求体](https://segmentfault.com/a/1190000006689767)
+* 6.application/x-www-form-urlencoded, 常用表单提交
+* 7.**multipart/form-data**, 用于发送文件的post包, 须配合Content-Disposition包含文件名, 分割文件为多个boundary
+![multipart/form-data结构图](https://raw.githubusercontent.com/sunxlfred/RES/master/multipart%3Aform-data.png)
+* 8. application/octet-stream, 传递二进制流, 生成的文件扩展名 .tif(图片格式的一种)
+* 9.application/json, 常用json上传, HTTP并不存在json, 是将 String 转换成json
+* 10.application/xml,
+...
+其中lanbuff上传图片就是拼接 RequestBody 为 MultipartBody 的 FORM 类型
+```
+RequestBody requestBody = new MultipartBody.Builder()
+        .setType(MultipartBody.FORM)
+        .addFormDataPart("userId", SharedPreferencesUtils.getStringData(this, Constant.sp_user_id, ""))
+        .addFormDataPart("version", Utility.getVerName(LanbuffApp.getInstance()))
+        .addFormDataPart("device", Utility.getDeviceId())
+        .addFormDataPart("phone", uploadMissionBean.getPhone())
+        .addFormDataPart("studentIds", uploadMissionBean.getStudentIds())
+        .addFormDataPart("coachId", uploadMissionBean.getCoachId())
+        .addFormDataPart("footprintTime", DateStrUtil.dateToStrSS(new Date()))
+        .addFormDataPart("content", uploadMissionBean.getContent())
+        .addFormDataPart("images", imageFile.getName(), RequestBody.create(MediaType.parse("image/*"), imageFile))
+        .build();
+uploadApi.sync2FootprintUrl(requestBody)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<BaseResponseBean>() {
+
+以及请求api中:
+@POST(Constant.url_sync_2_footprint)
+Observable<BaseResponseBean> sync2FootprintUrl(@Body RequestBody body);
+```
+
+##### 请求实例:
+```
+POST /servlet/default.jsp HTTP/1.1
+Accept: text/plain; text/html
+Accept-Language: en-gb
+Connection: Keep-Alive
+Host: localhost
+Referer: http://localhost/ch8/SendDetails.htm
+User-Agent: Mozilla/4.0 (compatible; MSIE 4.01; Windows 98)
+Content-Length: 33
+Content-Type: application/x-www-form-urlencoded
+Accept-Encoding: gzip, deflate
+
+LastName=Franks&FirstName=Michael
+```
+
+### 260. HTTP响应[Ref:CSDN](https://blog.csdn.net/tycoon1988/article/details/39991211)
+##### 1. 响应行
+* 协议 空格 状态 空格 状态描述\r\n
+##### 2. 响应头
+* head1:value1\r\n
+* head2:value2\r\n
+* headn:valuen\r\n
+##### 3. 空行\r\n
+##### 4. 响应体
+
+##### 响应实例:
+```
+HTTP/1.1 200 OK
+Server: Microsoft-IIS/4.0
+Date: Mon, 3 Jan 1998 13:13:33 GMT
+Content-Type: text/html
+Last-Modified: Mon, 11 Jan 1998 13:23:42 GMT
+Content-Length: 112
+
+< html>
+< head>
+< title>HTTP Response Example</title></head><body>
+Welcome to Brainy Software
+< /body>
+< /html>
+```
