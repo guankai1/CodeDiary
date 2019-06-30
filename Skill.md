@@ -1380,3 +1380,9 @@ Welcome to Brainy Software
 < /body>
 < /html>
 ```
+
+### 261. 一张500x500的图在drawable-xdpi下占多少空间.
+* 图片大小: 500x500, 则图片大小是250000pixel(像素)
+* 色彩模式: 每个像素能展示多大范围的颜色
+  * 色彩模式如果是 RGB, 则是 250000 x 3 = 750000bytes
+  *
