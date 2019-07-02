@@ -78,6 +78,32 @@ dG #删除当前行到底
 * /dev/hda #hda 是 Hard Disk A 的缩写
 * /dev/sda #SCSI hard Disk A
 
+
+### Ubuntu16.04重启报错
+自身问题是之前扩充了一次整体硬盘后未继续分区合并, 解决方案[Ref: Vixual](http://www.vixual.net/blog/archives/213)
+```
+sd 2:0:0:0 [sda] Assuming drive cache: write through
+/dev/sda1 contains a file system with errors, check forced.
+Inodes that were part of a corrupted orphan linked list found.
+
+/dev/sda1: UNEXPECTED INCONSISTENCY; RUN fsck MANUALLY.
+  (i.e., without -a or -p options)
+fsck exited with status code 4
+The root filesystem on /dev/sda1 requires a manual fsck
+
+BusyBox v1.22.1 (Ubuntu 1:1.22.0-15ubuntu1) built-in shell (ash)
+Enter 'help' for a list of build-in commands.
+(initramfs)
+```
+
+#### 解决:
+翻译后发现，需要手动调用fsck进行自动修复
+```
+$ fsck -y /dev/sda1
+返回一长串后
+$ reboot
+```
+
 ### 1. 软件扩充Linux虚拟机硬盘
 ### 2. Linux下将扩充的空间用于分区
 *
