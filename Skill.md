@@ -1309,7 +1309,7 @@ public static Bitmap getPicFromBytes(byte[] bytes, BitmapFactory.Options opts) {
 ###### 后四个是post发包的形式[Ref:HTTP请求头与请求体](https://segmentfault.com/a/1190000006689767)
 * 6.application/x-www-form-urlencoded, 常用表单提交
 * 7.**multipart/form-data**, 用于发送文件的post包, 须配合Content-Disposition包含文件名, 分割文件为多个boundary
-![multipart/form-data结构图](https://raw.githubusercontent.com/sunxlfred/RES/master/multipart%3Aform-data.png)
+![multipart/form-data结构图](https://raw.githubusercontent.com/fredsun/RES/master/multipart%3Aform-data.png)
 * 8. application/octet-stream, 传递二进制流, 生成的文件扩展名 .tif(图片格式的一种)
 * 9.application/json, 常用json上传, HTTP并不存在json, 是将 String 转换成json
 * 10.application/xml,

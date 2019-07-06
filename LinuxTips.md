@@ -63,21 +63,40 @@ dG #删除当前行到底
   -
 
 ### Linux分区简介
-* 硬盘标准
+#### 硬盘标准
   - ATA -> IDE, 并口设备
   - SCSI
   - SATA 是ATA的升级, 串口设备，目的是替换 IDE
 
-* 硬盘种类
-  - IDE
-  - SATA
-  - SCSI
+#### 硬盘种类
+* IDE
+* SATA
+* SCSI
 
-* IDE/SATA # 硬盘与主板物理连接方式分为这两种，前者通风不良，后者是主流
+  - IDE/SATA # 硬盘与主板物理连接方式分为这两种，前者通风不良，后者是主流
+
+
+#### 系统目录结构
+![Linux 树状结构](https://raw.githubusercontent.com/fredsun/RES/master/LinuxTreeStructure.jpg)
+
 * /dev #device缩写
 * /dev/hda #hda 是 Hard Disk A 的缩写
 * /dev/sda #SCSI hard Disk A
+* /dev/sda1 #第一块SCSI硬盘的主分区（1-4 为主分区）
 
+#### 系统分区结构
+分区与目录挂钩称为挂载
+##### 分区分类
+* 主分区，1-4，硬盘的容量=主分区+扩展分区
+* 扩展分区，0-1, 且主+扩展最多4个，扩展分区=各逻辑分区之和，是一个概念
+  - 逻辑分区，如swap
+
+##### 分区表
+* MBR, Master Boot Reord主引导记录, 在磁盘的第一个扇区，分为三部分 **用fdisk分区**
+  - bootloader
+  - DPT, 分区表，64个字节， 一个分区表16个字节，所以只能存放四个分区表
+  - 结束字， 55AA
+* GPT，GUID Partition Table Scheme, 支持128个分区，支持18EB, **用gdisk分区**
 
 ### Ubuntu16.04重启报错
 自身问题是之前扩充了一次整体硬盘后未继续分区合并, 解决方案[Ref: Vixual](http://www.vixual.net/blog/archives/213)
@@ -106,4 +125,12 @@ $ reboot
 
 ### 1. 软件扩充Linux虚拟机硬盘
 ### 2. Linux下将扩充的空间用于分区
-*
+```
+fdisk /dev/sda
+n
+p
+3
+回车
+50G
+
+```
