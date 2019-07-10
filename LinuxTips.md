@@ -50,12 +50,12 @@ dG #删除当前行到底
 
 ## 扩容硬盘
 ### 命令
-* df  #查看文件系统的磁盘占用情况
-* du -h /xxx/xxx #查询路径下目录及子目录占用情况,
+* ```df```  #查看文件系统的磁盘占用情况
+* ```du -h``` /xxx/xxx #查询路径下目录及子目录占用情况,
   - h补充了单位k/M,
   - s只显示当前目录占用磁盘情况
-* fdisk -l #查询分区情况
-* fdish /dev/sda #对sda操作
+* ```fdisk -l``` #查询分区情况
+* ```fdisk /dev/sda``` #对sda操作
   - m #帮助
   - n #添加新分区
     - p #主分区, 编号1到4
@@ -126,11 +126,57 @@ $ reboot
 ### 1. 软件扩充Linux虚拟机硬盘
 ### 2. Linux下将扩充的空间用于分区
 ```
-fdisk /dev/sda
+sudo fdisk -l
+sudo fdisk /dev/sda
 n
 p
 3
-回车
-50G
-
+自己输入 #最后的分区开始作为first sector!
+回车 #默认到最后的分区即可
+w
+sudo fdisk -l
 ```
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Re-reading the partition table failed.: Device or resource busy
+
+The kernel still uses the old table. The new table will be used at the next reboot or after you run partprobe(8) or kpartx(8).
+
+
+### linux无法扩充硬盘
+```
+fred@ubuntu:~$ sudo fdisk -l
+[sudo] password for fred:
+Disk /dev/sda: 500 GiB, 536870912000 bytes, 1048576000 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0xe8217d63
+
+Device     Boot    Start      End  Sectors  Size Id Type
+/dev/sda1  *        2048 39942143 39940096   19G 83 Linux
+/dev/sda2       39944190 41940991  1996802  975M  5 Extended
+/dev/sda5       39944192 41940991  1996800  975M 82 Linux swap / Solaris
+```
+如上的系统按照下面的命令执行后选择 ```Last sector, +sectors or +size{K,M,G,T,P} (39942144-39944189, default 39944189):``` 输入```50G```报错 **```Value out of range.```**, 原因是FirstSector选择的是sda1与sda2之间的扇区, 连续区域只有这么大
+```
+Command (m for help): n
+Partition type
+   p   primary (1 primary, 1 extended, 2 free)
+   l   logical (numbered from 5)
+Select (default p): p
+Partition number (3,4, default 3): 3
+First sector (39942144-1048575999, default 39942144):
+Last sector, +sectors or +size{K,M,G,T,P} (39942144-39944189, default 39944189): 50G
+Value out of range.
+```
+#### 解决：
+1. 如果空隙的是swap分区[Ref:LinuxQuestion](https://www.linuxquestions.org/questions/linux-desktop-74/value-out-of-range-error-on-a-disk-with-40-gb-free-space-4175479882/)
+```
+swapoff -av  # 关闭swap分区的 所有交换设备，和显示版本信息
+mkswap /dev/sda5 # 设置swap分区
+swapon -av # 打开swap分区的
+```
+2. 如果空隙的是extended分区，先跳过
