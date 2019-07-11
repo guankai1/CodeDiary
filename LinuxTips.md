@@ -36,11 +36,17 @@ sudo apt-get install yum
 ```
 apt-get XXX
 ```
-删除
+### 删除
 ```
 dd #删除整行
 d1G #删除当前行到顶
 dG #删除当前行到底
+```
+### 新建
+```
+mkdir xxx #新建文件夹
+rm xxx #删除文件夹
+vi xxx #新建文件
 ```
 ## Bash
 * 文件扩展名为.bash
