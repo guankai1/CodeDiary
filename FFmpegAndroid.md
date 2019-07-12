@@ -1,5 +1,5 @@
 ## FFmpeg准备
-1. 更新apt-get, 需要sudo
+1. 64位ubuntu安装32位兼容库，更新apt-get, 需要sudo
 ```
 sudo apt-get update
 sudo apt-get install yasm
@@ -160,3 +160,29 @@ make: *** [install-man] Error 1
 
 ##### 编译出现问题
 * 解决：terminal里的看不懂的话，查看./ffbuild/config.log 里的日记
+
+
+##### 64位ubuntu安装32位库时报错
+安装时的命令行
+```
+sudo apt-get install ia32-libs
+```
+报错：
+```
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+Package ia32-libs is not available, but is referred to by another package.
+This may mean that the package is missing, has been obsoleted, or
+is only available from another source
+However the following packages replace it:
+  lib32ncurses5 lib32z1
+
+E: Package 'ia32-libs' has no installation candidate
+```
+解决:
+```
+sudo apt-get update
+sudo apt-get -y upgrade
+apt-get -y install gcc g++ make cmake curl  libcurl3 libcurl3-dev bzip2 pkg-config
+```
