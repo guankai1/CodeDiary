@@ -1,9 +1,101 @@
+## FFmpegLearn
+### 概述
+ffmpeg支持大量的音视频编解码，通常大家所说的视频格式(format)可以理解为压缩格式(container)或者混流格式(Muxing)，例如`avi`, `mp4`, `mkv`等，他们相当于一个容易，讲视频和音频、字幕包装在一起，并按照制定的方式同步输出。
+编、解码格式，也就是所谓的裸流的格式(raw bitstream)，视频编码方式很多，现在使用最多的就是`H.264 (AVC)`，其他编码方式还有`MPEG-2`, `MPEG-4 Part 2`, `MPEG-4 Part10`
+封装格式的区域之一在于对音视频编码格式的支持
+技术点包含为一下四个: 封装技术，视频压缩编码技术，音频压缩编码技术，流媒体协议
+
+### 播放原理
+1. 解协议
+2. 解封装
+3. 解码
+4. 音视频同步
+
+#### 解协议
+音视频在传输过程中加入了一些信令数据，如播放，暂停，等，解协议例如`HTTP`, `RMTP`, `MMS`, 后输出压缩格式的数据。
+
+#### 解封装
+例如将压缩格式例如`MP4`, `MKV`, `RMVB`, `FLV`, `AVI`输出`H.264`编码的视频码流和`AAC`格式的音频码流。
+
+#### 解码
+最复杂最重要的一环, 将`H.264(AVC)`, `MPEG2`, `VC-1`格式的视频输出为非压缩的颜色数据如`YUV420P`, `RGB`。将`AAC`, `MP3`, `AC-3`格式的音频输出为非压缩的音频采样数据，如`PCM`。视频如果不编码，会非常大
+
+#### 封装格式
+AVI, MKV几乎覆盖所有格式, 除了 AVI，其余的都可以边下边播，RMVB支持的格式少一点
+
+|名称|推出机构|流媒体|支持的视频编码|支持的音频编码|目前使用领域|
+|---|---|---|---|---|---|
+|AVI   |Microsoft Inc.   |不支持   |几乎所有格式   | 几乎所有格式  |  BT下载影视 |
+|MP4   |MPEG   |支持   |MPEG-2, MPEG-4, H.264, H.263等   |AAC, MPEG-1 Layers I, II, III, AC-3等   |互联网视频网站   |
+|TS   |MPEG   |支持   |MPEG-1, MPEG-2, MPEG-4, H.264   |MPEG-1 Layers I, II, III, AAC,   |IPTV，数字电视   |
+|FLV   |Adobe Inc.   |支持   |Sorenson, VP6, H.264   |MP3, ADPCM, Linear PCM, AAC等   |互联网视频网站   |
+|MKV   |CoreCodec Inc.   | 支持  |几乎所有格式   | 几乎所有格式  | 互联网视频网站  |
+|RMVB   | Real Networks Inc.  | 支持  | RealVideo 8, 9, 10  | AAC, Cook Codec, RealAudio Lossless  | BT下载影视  |
+
+#### 视频编码
+|名称|推出机构|推出时间|目前使用领域|
+|---|---|---|---|
+|HEVC(H.265)   |MPEG/ITU-T   | 2013  |研发中   |
+|H.264   |MPEG/ITU-T   |2003   | 各个领域  |
+|MPEG4   | MPEG  |  2001 | 不温不火  |
+|MPEG2   | MPEG  | 1994  | 数字电视  |
+|VP9   |Google   |2013   | 研发中  |
+|VP8   |Google  |2008   | 不普及  |
+|VC-1   | Microsoft Inc.  | 2006  | 微软平台  |
+
+`H.264(AVC)` 是编码标准，官方编码器是JM，但是速度非常慢，无法商用，使用最多的是开源的 x264，下一代的`H.265(HEVC)`，官方编码器HM，同样很慢，考虑 x265
+
+比较结果是
+`HEVC > VP9 > H.264 > VP8 > MPEG4 > H.263 > MPEG2`
+
+##### H.264被替换的原因:
+1. 视频清晰度:720P -> 1080P -> 4Kx2K -> 8Kx4K
+2. 帧率:30fps -> 60fps -> 120fps -> 240fps
+3. 高压缩率
+
+#### 音频编码
+|名称|推出机构|推出时间|目前使用领域|
+|---|---|---|---|
+|AAC   |MPEG   |1997   |各个领域   |
+|AC-3   |Dolby Inc.   |1992   |电影   |
+|MP3   |MPEG   |1993   |各个领域（旧   |
+|WMA   |Microsoft Inc.  |1999   |微软平台   |
+
+因为音频压缩和视频相比影响很小，所以可以选用高效率的音频码率
+AAC+ > MP3PRO > AAC> RealAudio > WMA > MP3
+
+
+### 编码
+* 软编码, 升级方便，实现简单，但是CPU负载重，性能低
+* 硬编码, 性能高
+
+#### 软编码
+使用CPU进行编码
+
+#### 硬编码
+使用显卡GPU专用的DSP/FPGA/ASIC芯片等硬件进行编码
+
+#### FFmpeg 组成
+AVFormat 封装模块
+AVCodec 编解码模块
+AVFilter 滤镜模块
+AVDevice
+AVUtil
+swresample 音频转换模块，重采样等
+swscale 图像转换模块，缩放、像素格式转换等
+
+#### FFmpeg包组成
+
+
 ## FFmpeg准备
 1. 64位ubuntu安装32位兼容库，更新apt-get, 需要sudo
 ```
 sudo apt-get update
 sudo apt-get install yasm
 sudo apt-get install pkg-config
+sudo apt install curl
+sudo apt-get install autoconf
+
 ```
 2. 安装ndk r19c
 ```
@@ -18,9 +110,20 @@ https://github.com/FFmpeg/FFmpeg/archive/n4.1.3.tar.gz
 tar -zxvf n4.1.3.tar.gz
 ```
 
+### 2. 编译x264
+#### 2.1 安装nasm
+```
+curl -O -L http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/nasm-2.13.01.tar.bz2
+tar xjvf nasm-2.13.01.tar.bz2
+cd nasm-2.13.01
+./autogen.sh
+./configure
+make
+make install
+```
+
 ### 2. 编译FFmpeg
 #### 2.1 修改 configure(位于ffmpeg根目录)
-
 ```
 SLIBNAME_WITH_MAJOR='$(SLIBNAME).$(LIBMAJOR)'  
 LIB_INSTALL_EXTRA_CMD='$$(RANLIB)"$(LIBDIR)/$(LIBNAME)"'  
@@ -41,7 +144,7 @@ SLIB_INSTALL_LINKS='$(SLIBNAME)'
 
 ```
 #!/bin/bash
-NDK=/home/Documents/NDK/android-ndk-r15c
+NDK=/home/fred/Documents/NDK/android-ndk-r15c
 ADDI_LDFLAGS="-fPIE -pie"
 ADDI_CFLAGS="-fPIE -pie -march=armv7-a -mfloat-abi=softfp -mfpu=neon"
 CPU=armv7-a
@@ -56,6 +159,7 @@ configure()
 {
     ./configure \
     --prefix=$PREFIX \
+    --toolchain=clang-usan \
     --disable-encoders \
     --disable-decoders \
     --disable-avdevice \
@@ -142,7 +246,7 @@ sudo ./build.sh  #3.执行脚本开始编译：
 
 
 ## 报错汇总
-##### nasm/yasm not found or too old. Use --disable-x86asm for a crippled build
+##### 1. nasm/yasm not found or too old. Use --disable-x86asm for a crippled build
 * 未安装yasm
 
 ##### 权限问题
@@ -154,15 +258,15 @@ make: *** [install-man] Error 1
 ```
 * 解决: root 权限 build
 
-##### ffbuild/config.mak: No such file or directory[参考github](https://github.com/dxjia/ffmpeg-compile-shared-library-for-android/issues/9)
+##### 2. ffbuild/config.mak: No such file or directory[参考github](https://github.com/dxjia/ffmpeg-compile-shared-library-for-android/issues/9)
 * 执行.sh前未执行```./configure```
 
 
-##### 编译出现问题
+##### 3. 编译出现问题
 * 解决：terminal里的看不懂的话，查看./ffbuild/config.log 里的日记
 
 
-##### 64位ubuntu安装32位库时报错
+##### 4. 64位ubuntu安装32位库时报错
 安装时的命令行
 ```
 sudo apt-get install ia32-libs
@@ -186,3 +290,44 @@ sudo apt-get update
 sudo apt-get -y upgrade
 apt-get -y install gcc g++ make cmake curl  libcurl3 libcurl3-dev bzip2 pkg-config
 ```
+
+##### 5. armv7a-linux-androideabi21-clang is unable to create an executable file
+可能是build.sh里"--cc=XXX"的路径没有描述，也可能是NDK的路径缺少userName, 比如
+
+
+##### 6. Makefile:3: config.mak: No such file or directory
+./configure
+ 缺少的是config.mak, 这个文件由./configure 生成
+ 解决：[Ref:CSDN](https://github.com/dxjia/ffmpeg-compile-shared-library-for-android/issues/9)
+  ```
+  先执行
+  ./configure
+  ```
+
+##### 7. Found no assembler
+Minimum version is nasm-2.13
+If you really want to compile without asm, configure with --disable-asm.
+未安装yasm, 或者版本过低
+解决:
+```
+卸载后安装高版本nasm或者直接不要asm
+1. 卸载 sudo yum remove nasm && hash -r
+卸载后返回
+Setting up Remove Process
+No Match for argument: nasm
+No Packages marked for removal
+2. 直接不要asm
+./configure --disable-asm
+```
+
+##### 8. + autoheader
+./autogen.sh: 5: ./autogen.sh: autoheader: not found
+解决:安装auto
+```
+apt-get install autoconf
+```
+
+### reference
+* [总结]视音频编解码技术零基础学习方法 https://blog.csdn.net/leixiaohua1020/article/details/18893769
+* FFmpeg支持的压缩格式和编解码格式 http://notes.maxwi.com/2017/04/05/ffmpeg-codecs-formats/
+*
