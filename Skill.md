@@ -1385,4 +1385,19 @@ Welcome to Brainy Software
 * 图片大小: 500x500, 则图片大小是250000pixel(像素)
 * 色彩模式: 每个像素能展示多大范围的颜色
   * 色彩模式如果是 RGB, 则是 250000 x 3 = 750000bytes
-  *
+
+
+### 262.gradient
+270度时会失效，反向用45加颜色对调替代
+
+### 打包报错 app:lintVitalRelease
+Module:app中添加
+```
+lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+```
+
+
+### 集合塞进去的是数组还是
