@@ -1398,6 +1398,64 @@ lintOptions {
         abortOnError false
     }
 ```
+### 263. TabLayout
+* 取消下划线, 设置 app:tabIndicatorHeight="0dp"
+* 文字和图片间距，自定义Tab
+```
+tabLayoutMultiMain.getTabAt(0).setCustomView(getTabView("工作台",R.drawable.icon_workbench_notselect));
+tabLayoutMultiMain.getTabAt(1).setCustomView(getTabView("我",R.drawable.icon_workbench_notselect));
+public View getTabView(String title, int image_src) {
+    View v = LayoutInflater.from(getApplicationContext()).inflate(R.layout.tab_multi_main, null);
+    TextView textView = v.findViewById(R.id.tv_item_multi_main_name);
+    textView.setText(title);
+    ImageView imageView =v.findViewById(R.id.iv_item_multi_main_icon);
+    imageView.setImageResource(image_src);
+    v.setTag(title);//因为我用tag去区分点击的item，如果你用的tab.getPosition可以不设置这个值
+    return v;
+}
+```
 
+### 264.sp存list
+泛型在编译期类型被擦除导致
+
+### 265. 报错 app:compileDebugJavaWithJavac
+* 解决:
+1. 是否支持了java8
+2. 查看报错位置```gradlew compileDebugSources --stacktrace -info
+```
+3. ButterKnife 是否对 OnClick 注解的方法加了限制符 public/private
+4. 一般是编译时的问题，回头看一下自己新增加了什么包或者改了什么类
+
+### 266. org.gradle.api.internal.tasks.compile.CompilationFailedException: Compilation failed
+* 解决:
+* 1.gradle 需要将 compile 替换为 implementation
+* 2. invalidate cache
+### 267. statusbar 配合 fragment 切换.
+### 268. 让 EditText 失去焦点, 外部设置
+```
+android:focusable="true"
+android:focusableInTouchMode="true"
+```
+* activity 透明, fragment 补充不同颜色view
+
+### 269. AGPBI: {"kind":"error","text":"Program type already present: android.support.v4.os.ResultReceiver$MyResultReceiver","sources":[{}],"tool":"D8"} :app:transformDexArchiveWithExternalLibsDexMergerForDebug FAILED
+* 解决
+* 1. 确保android.useAndroidX=true, android.enableJetifier=true
+* 2. ButterKnife 可能和v4包存在冲突
+
+
+### 270. Could not find common.jar (android.arch.lifecycle:common:1.1.0)
+* 解决
+* 1. project 的 gralde 补充, 切记顺序, google()排在 allprojects 的最上面
+```
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url "https://maven.google.com" }
+        maven { url "http://dl.bintray.com/laobie/maven" }
+    }
+}
+```
 
 ### 集合塞进去的是数组还是
