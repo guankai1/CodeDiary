@@ -20,7 +20,7 @@
 11. [单例实战](https://github.com/guolindev/booksource/issues/5)
 12. leak canavy
 13. 主语从句 状语从句
-14. gifMaker
+
 15. 微博全景图PanoramaImageDetailView, 图片只是ImageView
 16. DialogFragment + 动画方向 = 弹出页面带阴影
 17. builder模式
@@ -62,7 +62,6 @@ https://www.nowcoder.com/discuss/30334?type=2&order=3&pos=8&page=1
 
 17. 上下文究竟是什么, 为什么可以在onAttach中强转成implements过的 Listener
 18. ActivityOptionsCompat
-
 20. service
 21. Robolectric
 22. new SpannableString(" " + position);
@@ -1421,7 +1420,9 @@ public View getTabView(String title, int image_src) {
 ### 265. 报错 app:compileDebugJavaWithJavac
 * 解决:
 1. 是否支持了java8
-2. 查看报错位置```gradlew compileDebugSources --stacktrace -info
+2. 查看报错位置
+```
+gradlew compileDebugSources --stacktrace -info
 ```
 3. ButterKnife 是否对 OnClick 注解的方法加了限制符 public/private
 4. 一般是编译时的问题，回头看一下自己新增加了什么包或者改了什么类
@@ -1457,5 +1458,16 @@ allprojects {
     }
 }
 ```
+
+### 270. java.lang.ClassCastException: java.util.ArrayList$SubList cannot be cast to java.util.ArrayList[Ref:知乎](https://zhuanlan.zhihu.com/p/25426466)
+
+* 错误操作：list.subList()后的结果强转ArrayList失败
+* 原理: subList 不可以强转成 List 的全部实现类(Vector, LinkedList) subList 的实现是返回了其内部类 SubList 的实例， 是原始链表的一个视图，只可查看，不可增删，增删需另建相应对象
+
+
+### 271. dialog背景模糊:
+* 截图Activity， 改变截图透明度，弹出窗口
+[Ref:
+安卓AlertDialog对话框背景模糊的简单实现](https://blog.csdn.net/qq_32718875/article/details/83513342)
 
 ### 集合塞进去的是数组还是
